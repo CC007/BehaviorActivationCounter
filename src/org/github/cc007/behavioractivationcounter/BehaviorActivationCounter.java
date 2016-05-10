@@ -33,9 +33,9 @@ import java.util.Random;
  */
 public class BehaviorActivationCounter {
 
-    private static final double percentageChange = 0.01;
-    private static final double percentageFailure = 0.75;
-    private static final int iterations = 1000;
+    private static final double chanceChange = 0.01;
+    private static final double chanceFailure = 0.2;
+    private static final int iterations = 100000;
 
     /**
      * @param args the command line arguments
@@ -43,6 +43,8 @@ public class BehaviorActivationCounter {
     public static void main(String[] args) {
         List<Integer> altSequentialHist = altSequential();
         double sumAltSequential = printAndSumHistogram(altSequentialHist);
+        List<Integer> managedHist = managed();
+        double sumManaged = printAndSumHistogram(managedHist);
         List<Integer> topDownHist = topDown();
         double sumTopDown = printAndSumHistogram(topDownHist);
         List<Integer> bottomUpHist = bottomUp();
@@ -68,12 +70,11 @@ public class BehaviorActivationCounter {
             hist.set(0, hist.get(0) + 1);
             while (true) {
                 Random r = new Random(System.nanoTime());
-                if (r.nextDouble() < percentageChange) {
+                if (r.nextDouble() < chanceChange) {
                     if (state == 0) {
                         state = 1;
-                        hist.set(1, hist.get(1) + 1);
                     } else {
-                        if (r.nextDouble() < percentageFailure) {
+                        if (r.nextDouble() < chanceFailure) {
                             state = 0;
                         } else {
                             state++;
@@ -84,6 +85,32 @@ public class BehaviorActivationCounter {
                     }
                 }
                 hist.set(state, hist.get(state) + 1);
+            }
+        }
+        return hist;
+    }
+    public static List<Integer> managed() {
+        List<Integer> hist = Arrays.asList(0, 0, 0, 0, 0);
+        for (int i = 0; i < iterations; i++) {
+            int state = 0;
+            while (true) {
+                Random r = new Random(System.nanoTime());
+                hist.set(4, hist.get(4) + 1);
+                hist.set(state, hist.get(state) + 1);
+                if (r.nextDouble() < chanceChange) {
+                    if (state == 0) {
+                        state = 1;
+                    } else {
+                        if (r.nextDouble() < chanceFailure) {
+                            state--;
+                        } else {
+                            state++;
+                        }
+                        if (state == 4) {
+                            break;
+                        }
+                    }
+                }
             }
         }
         return hist;
@@ -99,14 +126,11 @@ public class BehaviorActivationCounter {
             hist.set(3, hist.get(3) + 4);
             while (true) {
                 Random r = new Random(System.nanoTime());
-                if (r.nextDouble() < percentageChange) {
+                if (r.nextDouble() < chanceChange) {
                     if (state == 0) {
                         state = 1;
-                        hist.set(1, hist.get(1) + 1);
-                        hist.set(2, hist.get(2) + 1);
-                        hist.set(3, hist.get(3) + 1);
                     } else {
-                        if (r.nextDouble() < percentageFailure) {
+                        if (r.nextDouble() < chanceFailure) {
                             state--;
                         } else {
                             state++;
@@ -131,13 +155,11 @@ public class BehaviorActivationCounter {
             hist.set(0, hist.get(0) + 1);
             while (true) {
                 Random r = new Random(System.nanoTime());
-                if (r.nextDouble() < percentageChange) {
+                if (r.nextDouble() < chanceChange) {
                     if (state == 0) {
                         state = 1;
-                        hist.set(0, hist.get(0) + 1);
-                        hist.set(1, hist.get(1) + 1);
                     } else {
-                        if (r.nextDouble() < percentageFailure) {
+                        if (r.nextDouble() < chanceFailure) {
                             state--;
                         } else {
                             state++;
@@ -154,4 +176,5 @@ public class BehaviorActivationCounter {
         }
         return hist;
     }
+
 }
