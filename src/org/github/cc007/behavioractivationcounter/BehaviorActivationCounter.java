@@ -37,7 +37,7 @@ public class BehaviorActivationCounter {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        double percentage = 0.9;
+        double percentage = 0.9999;
         int iterations = 1000;
         List<Integer> hist = Arrays.asList(0, 0, 0, 0);
         for (int i = 0; i < iterations; i++) {
@@ -68,12 +68,12 @@ public class BehaviorActivationCounter {
                 }
             }
         }
-        double sum = 0.0;
+        double sumTopDown = 0.0;
         for (Integer histNr : hist) {
             System.out.print(((double) histNr) / iterations + " ");
-            sum += histNr;
+            sumTopDown += histNr;
         }
-        System.out.println("= " + sum / iterations);
+        System.out.println("= " + sumTopDown / iterations);
         hist = Arrays.asList(0, 0, 0, 0);
         for (int i = 0; i < iterations; i++) {
             int state = 0;
@@ -99,12 +99,13 @@ public class BehaviorActivationCounter {
                 }
             }
         }
-        sum = 0.0;
+        double sumBottomUp = 0.0;
         for (Integer histNr : hist) {
             System.out.print(((double) histNr) / iterations + " ");
-            sum += histNr;
+            sumBottomUp += histNr;
         }
-        System.out.println("= " + sum / iterations);
+        System.out.println("= " + sumBottomUp / iterations);
+        System.out.println("Ratio: " + sumTopDown / (sumBottomUp + sumTopDown));
     }
 
 }
