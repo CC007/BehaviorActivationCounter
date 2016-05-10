@@ -33,13 +33,16 @@ import java.util.Random;
  */
 public class BehaviorActivationCounter {
 
-    private static final double percentage = 0.99;
+    private static final double percentageChange = 0.01;
+    private static final double percentageFailure = 0.75;
     private static final int iterations = 1000;
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
+        List<Integer> altSequentialHist = altSequential();
+        double sumAltSequential = printAndSumHistogram(altSequentialHist);
         List<Integer> topDownHist = topDown();
         double sumTopDown = printAndSumHistogram(topDownHist);
         List<Integer> bottomUpHist = bottomUp();
@@ -47,8 +50,8 @@ public class BehaviorActivationCounter {
         System.out.println("Ratio: " + sumTopDown / (sumBottomUp + sumTopDown));
 
     }
-    
-    public static double printAndSumHistogram(List<Integer> hist){
+
+    public static double printAndSumHistogram(List<Integer> hist) {
         double sum = 0.0;
         for (Integer histNr : hist) {
             System.out.print(((double) histNr) / iterations + " ");
@@ -57,7 +60,36 @@ public class BehaviorActivationCounter {
         System.out.println("= " + sum / iterations);
         return sum;
     }
-    public static List<Integer> topDown(){
+
+    public static List<Integer> altSequential() {
+        List<Integer> hist = Arrays.asList(0, 0, 0, 0);
+        for (int i = 0; i < iterations; i++) {
+            int state = 0;
+            hist.set(0, hist.get(0) + 1);
+            while (true) {
+                Random r = new Random(System.nanoTime());
+                if (r.nextDouble() < percentageChange) {
+                    if (state == 0) {
+                        state = 1;
+                        hist.set(1, hist.get(1) + 1);
+                    } else {
+                        if (r.nextDouble() < percentageFailure) {
+                            state = 0;
+                        } else {
+                            state++;
+                        }
+                        if (state == 4) {
+                            break;
+                        }
+                    }
+                }
+                hist.set(state, hist.get(state) + 1);
+            }
+        }
+        return hist;
+    }
+
+    public static List<Integer> topDown() {
         List<Integer> hist = Arrays.asList(0, 0, 0, 0);
         for (int i = 0; i < iterations; i++) {
             int state = 0;
@@ -66,56 +98,60 @@ public class BehaviorActivationCounter {
             hist.set(2, hist.get(2) + 3);
             hist.set(3, hist.get(3) + 4);
             while (true) {
-                if (state == 0) {
-                    state = 1;
-                    hist.set(1, hist.get(1) + 1);
-                    hist.set(2, hist.get(2) + 1);
-                    hist.set(3, hist.get(3) + 1);
-                } else {
-                    Random r = new Random(System.nanoTime());
-                    if (r.nextDouble() < percentage) {
-                        state--;
+                Random r = new Random(System.nanoTime());
+                if (r.nextDouble() < percentageChange) {
+                    if (state == 0) {
+                        state = 1;
+                        hist.set(1, hist.get(1) + 1);
+                        hist.set(2, hist.get(2) + 1);
+                        hist.set(3, hist.get(3) + 1);
                     } else {
-                        state++;
-                    }
-                    if (state == 4) {
-                        break;
-                    }
-                    for (int j = state; j < 4; j++) {
-                        hist.set(j, hist.get(j) + 1);
+                        if (r.nextDouble() < percentageFailure) {
+                            state--;
+                        } else {
+                            state++;
+                        }
+                        if (state == 4) {
+                            break;
+                        }
                     }
                 }
-            }
-        }
-        return hist;
-    }
-    public static List<Integer> bottomUp() {
-        List<Integer> hist = Arrays.asList(0, 0, 0, 0);
-        for (int i = 0; i < iterations; i++) {
-            int state = 0;
-            hist.set(0, hist.get(0) + 1);
-            while (true) {
-                if (state == 0) {
-                    state = 1;
-                    hist.set(0, hist.get(0) + 1);
-                    hist.set(1, hist.get(1) + 1);
-                } else {
-                    Random r = new Random(System.nanoTime());
-                    if (r.nextDouble() < percentage) {
-                        state--;
-                    } else {
-                        state++;
-                    }
-                    if (state == 4) {
-                        break;
-                    }
-                    for (int j = state; j >= 0; j--) {
-                        hist.set(j, hist.get(j) + 1);
-                    }
+                for (int j = state; j < 4; j++) {
+                    hist.set(j, hist.get(j) + 1);
                 }
             }
         }
         return hist;
     }
 
+    public static List<Integer> bottomUp() {
+        List<Integer> hist = Arrays.asList(0, 0, 0, 0);
+        for (int i = 0; i < iterations; i++) {
+            int state = 0;
+            hist.set(0, hist.get(0) + 1);
+            while (true) {
+                Random r = new Random(System.nanoTime());
+                if (r.nextDouble() < percentageChange) {
+                    if (state == 0) {
+                        state = 1;
+                        hist.set(0, hist.get(0) + 1);
+                        hist.set(1, hist.get(1) + 1);
+                    } else {
+                        if (r.nextDouble() < percentageFailure) {
+                            state--;
+                        } else {
+                            state++;
+                        }
+                        if (state == 4) {
+                            break;
+                        }
+                    }
+                }
+                for (int j = state; j >= 0; j--) {
+                    hist.set(j, hist.get(j) + 1);
+                }
+            }
+        }
+        return hist;
+    }
 }
