@@ -33,12 +33,31 @@ import java.util.Random;
  */
 public class BehaviorActivationCounter {
 
+    private static final double percentage = 0.99;
+    private static final int iterations = 1000;
+
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        double percentage = 0.9999;
-        int iterations = 1000;
+        List<Integer> topDownHist = topDown();
+        double sumTopDown = printAndSumHistogram(topDownHist);
+        List<Integer> bottomUpHist = bottomUp();
+        double sumBottomUp = printAndSumHistogram(bottomUpHist);
+        System.out.println("Ratio: " + sumTopDown / (sumBottomUp + sumTopDown));
+
+    }
+    
+    public static double printAndSumHistogram(List<Integer> hist){
+        double sum = 0.0;
+        for (Integer histNr : hist) {
+            System.out.print(((double) histNr) / iterations + " ");
+            sum += histNr;
+        }
+        System.out.println("= " + sum / iterations);
+        return sum;
+    }
+    public static List<Integer> topDown(){
         List<Integer> hist = Arrays.asList(0, 0, 0, 0);
         for (int i = 0; i < iterations; i++) {
             int state = 0;
@@ -68,13 +87,10 @@ public class BehaviorActivationCounter {
                 }
             }
         }
-        double sumTopDown = 0.0;
-        for (Integer histNr : hist) {
-            System.out.print(((double) histNr) / iterations + " ");
-            sumTopDown += histNr;
-        }
-        System.out.println("= " + sumTopDown / iterations);
-        hist = Arrays.asList(0, 0, 0, 0);
+        return hist;
+    }
+    public static List<Integer> bottomUp() {
+        List<Integer> hist = Arrays.asList(0, 0, 0, 0);
         for (int i = 0; i < iterations; i++) {
             int state = 0;
             hist.set(0, hist.get(0) + 1);
@@ -99,13 +115,7 @@ public class BehaviorActivationCounter {
                 }
             }
         }
-        double sumBottomUp = 0.0;
-        for (Integer histNr : hist) {
-            System.out.print(((double) histNr) / iterations + " ");
-            sumBottomUp += histNr;
-        }
-        System.out.println("= " + sumBottomUp / iterations);
-        System.out.println("Ratio: " + sumTopDown / (sumBottomUp + sumTopDown));
+        return hist;
     }
 
 }
